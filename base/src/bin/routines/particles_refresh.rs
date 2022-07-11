@@ -154,6 +154,9 @@ pub fn particles_refresh()
     let particles_stuff = Arc::new(prepare_particles(gl.clone()).unwrap());
 
 
+
+    let mut counter = 0;
+
     let render_loop_closure = Rc::new(RefCell::new(None));
     let alias_rlc = render_loop_closure.clone();
     *alias_rlc.borrow_mut() = Some(Closure::wrap(Box::new(move || {
@@ -162,25 +165,52 @@ pub fn particles_refresh()
         cursor = now;
 
         
+        counter += 1;
+
+
         gl.clear(GL::COLOR_BUFFER_BIT);
 
         let game_state = update_game_state(time_delta, game_state.clone()).unwrap();
 
-        draw_particles(
-            gl.clone(),
-            particles_stuff.shader_program.clone(),
-            particles_stuff.vertex_array_a.clone(),
-            particles_stuff.vertex_array_b.clone(),
-            particles_stuff.current_vertex_array.clone(),
-            particles_stuff.current_transform_feedback.clone(),
-            particles_stuff.transform_feedback_a.clone(),
-            particles_stuff.transform_feedback_b.clone(),
-            particles_stuff.position_buffer_a.clone(),
-            particles_stuff.velocity_buffer_a.clone(),
-            particles_stuff.position_buffer_b.clone(),
-            particles_stuff.velocity_buffer_b.clone(),
-            switch.clone(),
-        );
+
+
+        if counter > 300 {
+
+
+            draw_particles(
+                gl.clone(),
+                particles_stuff.shader_program.clone(),
+                particles_stuff.vertex_array_a.clone(),
+                particles_stuff.vertex_array_b.clone(),
+                particles_stuff.current_vertex_array.clone(),
+                particles_stuff.current_transform_feedback.clone(),
+                particles_stuff.transform_feedback_a.clone(),
+                particles_stuff.transform_feedback_b.clone(),
+                particles_stuff.position_buffer_a.clone(),
+                particles_stuff.velocity_buffer_a.clone(),
+                particles_stuff.position_buffer_b.clone(),
+                particles_stuff.velocity_buffer_b.clone(),
+                switch.clone(),
+            );
+    
+
+        }
+
+        // draw_particles(
+        //     gl.clone(),
+        //     particles_stuff.shader_program.clone(),
+        //     particles_stuff.vertex_array_a.clone(),
+        //     particles_stuff.vertex_array_b.clone(),
+        //     particles_stuff.current_vertex_array.clone(),
+        //     particles_stuff.current_transform_feedback.clone(),
+        //     particles_stuff.transform_feedback_a.clone(),
+        //     particles_stuff.transform_feedback_b.clone(),
+        //     particles_stuff.position_buffer_a.clone(),
+        //     particles_stuff.velocity_buffer_a.clone(),
+        //     particles_stuff.position_buffer_b.clone(),
+        //     particles_stuff.velocity_buffer_b.clone(),
+        //     switch.clone(),
+        // );
 
 
 
@@ -545,7 +575,7 @@ fn set_player_two_events
         // assert tsv_scalar == tsv_scalar_2;
         let t_dx = game_state.lock().unwrap().player_two.lock().unwrap().position_dx;
         let t_dy = game_state.lock().unwrap().player_two.lock().unwrap().position_dy;
-        let mut torpedo = Vehicle_100 {
+        let mut torpedo = Torp200 {
             position_dx:  t_dx,
             position_dy: t_dy,
             vifo_theta: ticv_theta,
@@ -553,6 +583,7 @@ fn set_player_two_events
             velocity_scalar: tsv_scalar,
             velocity_dx: tsv_dx,
             velocity_dy: tsv_dy,
+            time_fired: Instant::now(),
         };
         game_state.lock().unwrap().torps_in_flight.lock().unwrap().push(Arc::new(Mutex::new(torpedo)));
     },
@@ -612,7 +643,7 @@ fn set_player_one_events
                 // assert tsv_scalar == tsv_scalar_2;
                 let t_dx = game_state.lock().unwrap().player_one.lock().unwrap().position_dx;
                 let t_dy = game_state.lock().unwrap().player_one.lock().unwrap().position_dy;
-                let mut torpedo = Vehicle_100 {
+                let mut torpedo = Torp200 {
                     position_dx:  t_dx,
                     position_dy: t_dy,
                     vifo_theta: ticv_theta,
@@ -620,6 +651,7 @@ fn set_player_one_events
                     velocity_scalar: tsv_scalar,
                     velocity_dx: tsv_dx,
                     velocity_dy: tsv_dy,
+                    time_fired: Instant::now(),
                 };
                 game_state.lock().unwrap().torps_in_flight.lock().unwrap().push(Arc::new(Mutex::new(torpedo)));
             },
@@ -699,16 +731,16 @@ fn draw_players
     let new_vifo_theta = game_state.lock().unwrap().player_one.lock().unwrap().vifo_theta;
     gl.uniform1f(Some(&player_vifo_theta_loc), new_vifo_theta.0);
     gl.draw_arrays(GL::TRIANGLES, 0, 6);
-    // gl.bind_buffer(GL::ARRAY_BUFFER, None);
+    gl.bind_buffer(GL::ARRAY_BUFFER, None);
 
-    // let new_pos_dx = game_state.lock().unwrap().player_two.lock().unwrap().position_dx;
-    // let new_pos_dy = game_state.lock().unwrap().player_two.lock().unwrap().position_dy;
+    let new_pos_dx = game_state.lock().unwrap().player_two.lock().unwrap().position_dx;
+    let new_pos_dy = game_state.lock().unwrap().player_two.lock().unwrap().position_dy;
 
-    // gl.uniform2f(Some(&player_pos_deltas_loc), new_pos_dx, new_pos_dy);
+    gl.uniform2f(Some(&player_pos_deltas_loc), new_pos_dx, new_pos_dy);
     
-    // let new_vifo_theta = game_state.lock().unwrap().player_two.lock().unwrap().vifo_theta;
-    // gl.uniform1f(Some(&player_vifo_theta_loc), new_vifo_theta.0);
-    // gl.draw_arrays(GL::TRIANGLES, 0, 6);
+    let new_vifo_theta = game_state.lock().unwrap().player_two.lock().unwrap().vifo_theta;
+    gl.uniform1f(Some(&player_vifo_theta_loc), new_vifo_theta.0);
+    gl.draw_arrays(GL::TRIANGLES, 0, 6);
 }
 
 // fn update_positions 
@@ -749,7 +781,7 @@ fn update_game_state // A slight misnomer, as game state is also mutated by even
     for i in -10..10 {
         for j in -10..10 {
             let base_dx = ((new_pos_dx * 1000.0) as i32) + i;
-            let base_dy = ((new_pos_dx * 1000.0) as i32) + j;
+            let base_dy = ((new_pos_dy * 1000.0) as i32) + j;
 
             let s_key : String = [base_dx.to_string(), String::from(":"), base_dy.to_string()].concat();
             
@@ -790,7 +822,7 @@ fn update_game_state // A slight misnomer, as game state is also mutated by even
     for i in -10..10 {
         for j in -10..10 {
             let base_dx = ((new_pos_dx * 1000.0) as i32) + i;
-            let base_dy = ((new_pos_dx * 1000.0) as i32) + j;
+            let base_dy = ((new_pos_dy * 1000.0) as i32) + j;
 
             let s_key : String = [base_dx.to_string(), String::from(":"), base_dy.to_string()].concat();
             
@@ -799,7 +831,7 @@ fn update_game_state // A slight misnomer, as game state is also mutated by even
                 tuple.1 = true;
                 collisions_map.insert(k, tuple);
             } else {
-                let tuple : CollisionSpace = (true, false, vec![]);
+                let tuple : CollisionSpace = (false, true, vec![]);
                 collisions_map.insert(s_key, tuple);   
             }
         }
@@ -809,7 +841,7 @@ fn update_game_state // A slight misnomer, as game state is also mutated by even
 
     let torps_in_flight = game_state.lock().unwrap().torps_in_flight.clone();
 
-    let mut v : Vec<Arc<Mutex<Vehicle_100>>> = vec![];
+    let mut v : Vec<Arc<Mutex<Torp200>>> = vec![];
     for (idx, torp) in torps_in_flight.lock().unwrap().iter().enumerate() {
         if !((new_pos_dx < -1.0) || (new_pos_dx > 1.0) || (new_pos_dy < -1.0) || (new_pos_dy > 1.0)) {
             v.push(Arc::new(Mutex::new(*torp.lock().unwrap())));
@@ -827,29 +859,32 @@ fn update_game_state // A slight misnomer, as game state is also mutated by even
         let new_pos_dx = pos_dx + (delta_scalar * v_dx);
         let new_pos_dy = pos_dy + (delta_scalar * v_dy);
 
-
         torp.lock().unwrap().position_dx = new_pos_dx;
         torp.lock().unwrap().position_dy = new_pos_dy;
 
-        for i in -5..5 {
-            for j in -5..5 {
+        // safety fused torps only arm after allowing some time to elapse.
+        if torp.lock().unwrap().time_fired.elapsed().as_millis() > 500 {
 
-                let base_dx = ((new_pos_dx * 1000.0) as i32) + i;
-                let base_dy = ((new_pos_dx * 1000.0) as i32) + j;
     
-                let s_key : String = [base_dx.to_string(), String::from(":"), base_dy.to_string()].concat();
-                
-                if collisions_map.contains_key(&s_key) {
-                    let (k, mut tuple) = collisions_map.remove_entry(&s_key).unwrap();
-                    // tuple.0 = true;
-                    tuple.2.push(idx);
-                    collisions_map.insert(k, tuple);
-                } else {
-                    let tuple : CollisionSpace = (true, false, vec![]);
-                    collisions_map.insert(s_key, tuple);   
+            for i in -5..5 {
+                for j in -5..5 {
+    
+                    let base_dx = ((new_pos_dx * 1000.0) as i32) + i;
+                    let base_dy = ((new_pos_dy * 1000.0) as i32) + j;
+        
+                    let s_key : String = [base_dx.to_string(), String::from(":"), base_dy.to_string()].concat();
+                    
+                    if collisions_map.contains_key(&s_key) {
+                        let (k, mut tuple) = collisions_map.remove_entry(&s_key).unwrap();
+                        tuple.2.push(idx);
+                        collisions_map.insert(k, tuple);
+                    } else {
+                        let tuple : CollisionSpace = (false, false, vec![]);
+                        collisions_map.insert(s_key, tuple);   
+                    }
                 }
-            }
-        }        
+            }               
+        } 
     }
 
     for (key, space) in collisions_map.iter() {
@@ -860,7 +895,7 @@ fn update_game_state // A slight misnomer, as game state is also mutated by even
             log!("vehicle collision");
         }
         if (space.1 == true) && (space.2.len() > 0) {
-            log!("Torpedo kills player 2.");
+            log!("Torpedo kills player two.");
         }
 
     }
@@ -921,17 +956,14 @@ fn create_game_state
     Ok(Arc::new(Mutex::new(game_state)))
 }
 
-
 // type CollisionSpace = (bool, bool, Arc<Mutex<Vec<usize>>>);
 type CollisionSpace = (bool, bool, Vec<usize>);
-
-
 
 struct GameState 
 {
     player_one: Arc<Mutex<Vehicle_100>>,
     player_two:  Arc<Mutex<Vehicle_100>>,
-    torps_in_flight: Arc<Mutex<Vec<Arc<Mutex<Vehicle_100>>>>>,
+    torps_in_flight: Arc<Mutex<Vec<Arc<Mutex<Torp200>>>>>,
     start_time: Arc<Instant>,
     elapsed_time: Arc<Mutex<u128>>,
     game_over: Arc<Mutex<bool>>,
@@ -941,6 +973,22 @@ struct GameState
     result: Arc<Mutex<u8>>,
     mode: Arc<u8>, // 1 player vs computer, 2 player local, 2 player network
 }
+
+#[derive(Copy, Clone)]
+struct Torp200 {
+    position_dx: f32, // raw displacement in x, y
+    position_dy: f32,
+    // vehicle_inertial_frame_orientation_theta: f32,
+    vifo_theta: Rad<f32>,
+    // polar description
+    velocity_theta: Rad<f32>,
+    velocity_scalar: f32,
+    // redundant alternate description of velocity, cartesian
+    velocity_dx: f32,
+    velocity_dy: f32, 
+    time_fired: Instant,
+}
+
 
 #[derive(Copy, Clone)]
 struct Vehicle_100 {
