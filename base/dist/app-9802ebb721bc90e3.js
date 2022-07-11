@@ -500,12 +500,12 @@ function getImports() {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper97 = function(arg0, arg1, arg2) {
-        const ret = makeMutClosure(arg0, arg1, 42, __wbg_adapter_20);
+    imports.wbg.__wbindgen_closure_wrapper98 = function(arg0, arg1, arg2) {
+        const ret = makeMutClosure(arg0, arg1, 44, __wbg_adapter_20);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper99 = function(arg0, arg1, arg2) {
-        const ret = makeMutClosure(arg0, arg1, 40, __wbg_adapter_23);
+    imports.wbg.__wbindgen_closure_wrapper100 = function(arg0, arg1, arg2) {
+        const ret = makeMutClosure(arg0, arg1, 42, __wbg_adapter_23);
         return addHeapObject(ret);
     };
     imports['./snippets/portal-26199112be97e1de/inline0.js'] = __wbg_star0;
@@ -541,7 +541,7 @@ function initSync(bytes) {
 
 async function init(input) {
     if (typeof input === 'undefined') {
-        input = new URL('app-be68ee31189e28e5_bg.wasm', import.meta.url);
+        input = new URL('app-9802ebb721bc90e3_bg.wasm', import.meta.url);
     }
     const imports = getImports();
 
