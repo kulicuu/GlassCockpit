@@ -98,9 +98,11 @@ pub fn particles_refresh()
     let render_loop_closure = Rc::new(RefCell::new(None));
     let alias_rlc = render_loop_closure.clone();
     *alias_rlc.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-        let now = game_state.lock().unwrap().start_time.elapsed().as_millis();
-        let time_delta = now - cursor;
-        cursor = now;
+
+        // Redo this.
+        // let now = game_state.lock().unwrap().start_time.elapsed().as_millis(); 
+        // let time_delta = now - cursor;
+        // cursor = now;
 
         gl.clear(GL::COLOR_BUFFER_BIT);
 
