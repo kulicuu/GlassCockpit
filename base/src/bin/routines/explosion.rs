@@ -149,22 +149,36 @@ pub fn explosion()
                 color_data.lock().unwrap()[vec3i + 2] = (js_sys::Math::random() as f32);
             }
 
+
+
+            gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            gl.bind_buffer(GL::ARRAY_BUFFER, None);
+            gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, None);
+            gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, None);
+        
+            gl.bind_vertex_array(None);
+            gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            gl.bind_buffer(GL::ARRAY_BUFFER, None);
+            gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, None);
+            gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, None);
+
             gl.bind_vertex_array(Some(&vertex_array_a));
-            let position_buffer_a = Arc::new(gl.create_buffer().unwrap());
             gl.bind_buffer(GL::ARRAY_BUFFER, Some(&position_buffer_a));
             let position_data_js = js_sys::Float32Array::from(position_data.lock().unwrap().as_slice());
             gl.buffer_data_with_array_buffer_view(GL::ARRAY_BUFFER, &position_data_js, GL::STREAM_COPY);
             gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
             gl.enable_vertex_attrib_array(0);
 
-            // let velocity_buffer_a = Arc::new(gl.create_buffer().unwrap());
+
             gl.bind_buffer(GL::ARRAY_BUFFER, Some(&velocity_buffer_a));
             let velocity_data_js = js_sys::Float32Array::from(velocity_data.lock().unwrap().as_slice());
             gl.buffer_data_with_array_buffer_view(GL::ARRAY_BUFFER, &velocity_data_js, GL::STREAM_COPY);
             gl.vertex_attrib_pointer_with_i32(1, 3, GL::FLOAT, false, 0, 0);
             gl.enable_vertex_attrib_array(1);
         
-            // let color_buffer = Arc::new(gl.create_buffer().unwrap());
+
             gl.bind_buffer(GL::ARRAY_BUFFER, Some(&color_buffer));
             let color_data_js = js_sys::Float32Array::from(color_data.lock().unwrap().as_slice());
             gl.buffer_data_with_array_buffer_view(GL::ARRAY_BUFFER, &color_data_js, GL::STATIC_DRAW);
@@ -173,7 +187,7 @@ pub fn explosion()
 
             gl.bind_buffer(GL::ARRAY_BUFFER, None);
 
-            // let transform_feedback_a = Arc::new(gl.create_transform_feedback().unwrap());
+
             gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, Some(&transform_feedback_a));
             gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, Some(&position_buffer_a));
             gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, Some(&velocity_buffer_a));
@@ -199,7 +213,7 @@ pub fn explosion()
         
             gl.bind_buffer(GL::ARRAY_BUFFER, None);
 
-            // let transform_feedback_b = Arc::new(gl.create_transform_feedback().unwrap());
+
             gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, Some(&transform_feedback_b));
             gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, Some(&position_buffer_b));
             gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, Some(&velocity_buffer_b));
