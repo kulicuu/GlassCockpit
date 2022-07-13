@@ -40,63 +40,6 @@ const HALF : f32 = SCALE / 2.0;
 const STEP : f32 = SCALE / RESOLUTION;
 const NUM_PARTICLES : u32 = 9680;
 
-
-
-// https://github.com/rust-lang/rust/issues/48564#issuecomment-698712971
-// std::time invocation causes panic.  There is a comment linked above which solves this
-// with the polyfillish stuff below.
-
-#[cfg(not(target_arch = "wasm32"))]
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Instant(std::time::Instant);
-
-#[cfg(not(target_arch = "wasm32"))]
-impl Instant {
-    pub fn now() -> Self { Self(std::time::Instant::now()) }
-    pub fn duration_since(&self, earlier: Instant) -> Duration { self.0.duration_since(earlier.0) }
-    pub fn elapsed(&self) -> Duration { self.0.elapsed() }
-    pub fn checked_add(&self, duration: Duration) -> Option<Self> { self.0.checked_add(duration).map(|i| Self(i)) }
-    pub fn checked_sub(&self, duration: Duration) -> Option<Self> { self.0.checked_sub(duration).map(|i| Self(i)) }
-}
-
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen(inline_js = r#"
-export function performance_now() {
-  return performance.now();
-}"#)]
-extern "C" {
-    fn performance_now() -> f64;
-}
-
-#[cfg(target_arch = "wasm32")]
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Instant(u64);
-
-#[cfg(target_arch = "wasm32")]
-impl Instant {
-    pub fn now() -> Self { Self((performance_now() * 1000.0) as u64) }
-    pub fn duration_since(&self, earlier: Instant) -> Duration { Duration::from_micros(self.0 - earlier.0) }
-    pub fn elapsed(&self) -> Duration { Self::now().duration_since(*self) }
-    pub fn checked_add(&self, duration: Duration) -> Option<Self> {
-        match duration.as_micros().try_into() {
-            Ok(duration) => self.0.checked_add(duration).map(|i| Self(i)),
-            Err(_) => None,
-        }
-    }
-    pub fn checked_sub(&self, duration: Duration) -> Option<Self> {
-        match duration.as_micros().try_into() {
-            Ok(duration) => self.0.checked_sub(duration).map(|i| Self(i)),
-            Err(_) => None,
-        }
-    }
-}
-
-impl Add<Duration> for Instant { type Output = Instant; fn add(self, other: Duration) -> Instant { self.checked_add(other).unwrap() } }
-impl Sub<Duration> for Instant { type Output = Instant; fn sub(self, other: Duration) -> Instant { self.checked_sub(other).unwrap() } }
-impl Sub<Instant>  for Instant { type Output = Duration; fn sub(self, other: Instant) -> Duration { self.duration_since(other) } }
-impl AddAssign<Duration> for Instant { fn add_assign(&mut self, other: Duration) { *self = *self + other; } }
-impl SubAssign<Duration> for Instant { fn sub_assign(&mut self, other: Duration) { *self = *self - other; } }
-
 pub fn particles_refresh()
 {
     let document = web_sys::window().unwrap().document().unwrap();
@@ -146,9 +89,7 @@ pub fn particles_refresh()
     gl.enable(GL::BLEND);
     gl.blend_func(GL::ONE, GL::ONE_MINUS_SRC_ALPHA);
 
-
     // let bare_shader_program = setup_bare_test_shaders(gl.clone()).unwrap();
-
 
     // let particles_stuff = prepare_particles(gl.clone).unwrap();
     let particles_stuff = Arc::new(prepare_particles(gl.clone()).unwrap());
@@ -171,78 +112,6 @@ pub fn particles_refresh()
         let tkp1 = *game_state.lock().unwrap().torp_kills_player_1.lock().unwrap();
 
 
-
-
-
-
-        if tkp1.0 == true {
-            let kx = tkp1.1; let ky = tkp1.2;
-
-            // draw_particles(
-            //     gl.clone(),
-            //     particles_stuff.shader_program.clone(),
-            //     particles_stuff.vertex_array_a.clone(),
-            //     particles_stuff.vertex_array_b.clone(),
-            //     particles_stuff.current_vertex_array.clone(),
-            //     particles_stuff.current_transform_feedback.clone(),
-            //     particles_stuff.transform_feedback_a.clone(),
-            //     particles_stuff.transform_feedback_b.clone(),
-            //     particles_stuff.position_buffer_a.clone(),
-            //     particles_stuff.velocity_buffer_a.clone(),
-            //     particles_stuff.position_buffer_b.clone(),
-            //     particles_stuff.velocity_buffer_b.clone(),
-            //     switch.clone(),
-            //     // particles_stuff.offset_uniforms_loc.clone(),
-            //     kx,
-            //     ky,
-            // );
-
-        } else {
-
-
-            draw_player_one(
-                gl.clone(),
-                game_state.clone(),
-                player_vertex_buffer.clone(),
-                player_js_vertices.clone(),
-                player_shader_program.clone(),
-                player_vertices_position.clone(),
-                time_location.clone(),
-                player_pos_deltas_loc.clone(),
-                player_vifo_theta_loc.clone(),                
-            );
-
-            // draw_players(
-            //     gl.clone(),
-            //     game_state.clone(),
-            //     player_vertex_buffer.clone(),
-            //     player_js_vertices.clone(),
-            //     player_shader_program.clone(),
-            //     player_vertices_position.clone(),
-            //     time_location.clone(),
-            //     player_pos_deltas_loc.clone(),
-            //     player_vifo_theta_loc.clone(),
-            // );
-        }
-
-
-        // draw_particles(
-        //     gl.clone(),
-        //     particles_stuff.shader_program.clone(),
-        //     particles_stuff.vertex_array_a.clone(),
-        //     particles_stuff.vertex_array_b.clone(),
-        //     particles_stuff.current_vertex_array.clone(),
-        //     particles_stuff.current_transform_feedback.clone(),
-        //     particles_stuff.transform_feedback_a.clone(),
-        //     particles_stuff.transform_feedback_b.clone(),
-        //     particles_stuff.position_buffer_a.clone(),
-        //     particles_stuff.velocity_buffer_a.clone(),
-        //     particles_stuff.position_buffer_b.clone(),
-        //     particles_stuff.velocity_buffer_b.clone(),
-        //     switch.clone(),
-        // );
-
-
         draw_particles(
             gl.clone(),
             particles_stuff.shader_program.clone(),
@@ -262,54 +131,6 @@ pub fn particles_refresh()
             0.0,
         );
 
-        draw_player_two(
-            gl.clone(),
-            game_state.clone(),
-            player_vertex_buffer.clone(),
-            player_js_vertices.clone(),
-            player_shader_program.clone(),
-            player_vertices_position.clone(),
-            time_location.clone(),
-            player_pos_deltas_loc.clone(),
-            player_vifo_theta_loc.clone(),
-        );
-
-
-
-
-        draw_torps(
-            gl.clone(),
-            game_state.clone(),
-            torp_vertex_buffer.clone(),
-            torp_js_vertices.clone(),
-            torp_shader_program.clone(),
-            torp_vertices_position.clone(),
-            time_location_2.clone(),
-            torp_pos_deltas_loc.clone(),
-            torp_vifo_theta_loc.clone(),
-        );
-
-        // draw_bare_test(
-        //     gl.clone(),
-        //     bare_shader_program.clone(),
-        // );
-
-        // draw_particles(
-        //     gl.clone(),
-        //     particles_shader_program.clone(),
-        //     vertex_array_a.clone(),
-        //     vertex_array_b.clone(),
-        //     current_vertex_array.clone(),
-        //     current_transform_feedback.clone(),
-        //     transform_feedback_a.clone(),
-        //     transform_feedback_b.clone(),
-        //     position_buffer_a.clone(),
-        //     velocity_buffer_a.clone(),
-        //     position_buffer_b.clone(),
-        //     velocity_buffer_b.clone(),
-        //     switch.clone(),
-        // );
-
         request_animation_frame(render_loop_closure.borrow().as_ref().unwrap());
     }) as Box<dyn FnMut()>));
 
@@ -322,42 +143,6 @@ fn request_animation_frame(f: &Closure<dyn FnMut()>) {
         .request_animation_frame(f.as_ref().unchecked_ref())
         .expect("should register `requestAnimationFrame` OK");
 }
-
-fn setup_bare_test_shaders
-<'a>
-(
-    gl: Arc<GL>,
-)
--> Result<Arc<web_sys::WebGlProgram>, &'a str>
-{
-    let vert_code = include_str!("../shaders/bare.vert");
-    let frag_code = include_str!("../shaders/bare.frag");
-    let vert_shader = gl.create_shader(GL::VERTEX_SHADER).unwrap();
-    let frag_shader = gl.create_shader(GL::FRAGMENT_SHADER).unwrap();
-    gl.shader_source(&vert_shader, vert_code);
-    gl.shader_source(&frag_shader, frag_code);
-    let vert_log = gl.get_shader_info_log(&vert_shader);
-    let frag_log = gl.get_shader_info_log(&frag_shader);
-    log!("vert log", vert_log);
-    log!("frag log", frag_log);
-
-    let shader_program = gl.create_program().unwrap();
-    gl.attach_shader(&shader_program, &vert_shader);
-    gl.attach_shader(&shader_program, &frag_shader);
-    gl.link_program(&shader_program);
-
-    Ok(Arc::new(shader_program))
-}
-
-fn draw_bare_test
-(
-    gl: Arc<GL>,
-    shader_program: Arc<web_sys::WebGlProgram>,
-)
-{
-    gl.use_program(Some(&shader_program));
-}
-
 
 fn draw_particles
 (

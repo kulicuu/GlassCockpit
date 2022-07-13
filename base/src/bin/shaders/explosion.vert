@@ -1,8 +1,8 @@
 #version 300 es
 
 layout(location=0) in vec3 aPosition;
-// layout(location=1) in vec3 aVelocity;
-// layout(location=2) in vec3 aColor;
+layout(location=1) in vec3 aVelocity;
+layout(location=2) in vec3 aColor;
 
 // layout (std140) uniform Mass {
 //     float mass1Factor;
@@ -13,34 +13,20 @@ layout(location=0) in vec3 aPosition;
 //     vec4 mass3Position;
 // };
 
-// out vec3 vPosition;
-// out vec3 vVelocity;
-// out vec3 vColor;
+out vec3 vPosition;
+out vec3 vVelocity;
+out vec3 vColor;
 void main() {    
     vec3 position = aPosition;
-    // vec3 position = aPosition + aPosition;
 
-    // vec3 velocity = aVelocity;
+    vec3 velocity = aVelocity;
 
-    // vec3 massVec = mass1Position.xyz - position;
-    // float massDist2 = max(0.01, dot(massVec, massVec));
-    // vec3 acceleration = mass1Factor * normalize(massVec) / massDist2;
+    velocity += (position * 0.005);
 
-    // massVec = mass2Position.xyz - position;
-    // massDist2 = max(0.01, dot(massVec, massVec));
-    // acceleration += mass2Factor * normalize(massVec) / massDist2;
+    vPosition = position + velocity;
+    vVelocity = velocity;
 
-    // massVec = mass3Position.xyz - position;
-    // massDist2 = max(0.01, dot(massVec, massVec));
-    // acceleration += mass3Factor * normalize(massVec) / massDist2;
-
-    // velocity += acceleration;
-    // velocity *= 0.9999;
-
-    // vPosition = position + velocity;
-    // vVelocity = velocity;
-
-    // vColor = aColor;
+    vColor = aColor;
     gl_PointSize = 2.4;
-    gl_Position = vec4(position, 1.0);
+    gl_Position = vec4(position + velocity, 1.0);
 }
