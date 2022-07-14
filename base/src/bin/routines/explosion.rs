@@ -109,18 +109,15 @@ pub fn explosion()
     
     let mut offset_uniform_data = [0.3, -0.4];
 
-    // let offset_uniform_buffer = Arc::new(gl.create_buffer());
-    // gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, (*offset_uniform_buffer).as_ref());
-    // let offset_uniform_data_js = js_sys::Float32Array::from(offset_uniform_data.as_slice());
-    // gl.buffer_data_with_array_buffer_view(GL::UNIFORM_BUFFER, &offset_uniform_data_js, GL::STATIC_DRAW);
 
-    let offset_uniform_buffer = Arc::new(Mutex::new(gl.create_buffer()));
-    gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, (*(offset_uniform_buffer.lock().unwrap())).as_ref());
-    // gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, (*offset_uniform_buffer).as_ref());
+
+    // let offset_uniform_buffer = Arc::new(Mutex::new(gl.create_buffer()));
+    // gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, (*(offset_uniform_buffer.lock().unwrap())).as_ref());
+    let offset_uniform_buffer = gl.create_buffer();
+    gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, offset_uniform_buffer.as_ref());
     let offset_uniform_data_js = js_sys::Float32Array::from(offset_uniform_data.as_slice());
     gl.buffer_data_with_array_buffer_view(GL::UNIFORM_BUFFER, &offset_uniform_data_js, GL::STATIC_DRAW);
 
-    // gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, None);
 
     gl.use_program(Some(&shader_program));
 
@@ -139,14 +136,31 @@ pub fn explosion()
         cursor = now;        
         let secs = now / 1000;
 
-        if (secs % 7 == 0) && (secs > interval_cursor) {
+        if (secs % 2 == 0) && (secs > interval_cursor) {
 
-            // gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, None);
+            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            // gl.bind_buffer(GL::ARRAY_BUFFER, None);
+            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, None);
+            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, None);
+        
+            gl.bind_vertex_array(None);
+            gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            gl.bind_buffer(GL::ARRAY_BUFFER, None);
+            gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, None);
+            gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, None);
+
+            gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, None);
+            let offset_uniform_buffer = gl.create_buffer();
+            gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, offset_uniform_buffer.as_ref());
 
             offset_uniform_data[0] -= 0.2;
             offset_uniform_data[1] += 0.2;
             let offset_uniform_data_js = js_sys::Float32Array::from(offset_uniform_data.as_slice());
             gl.buffer_data_with_array_buffer_view(GL::UNIFORM_BUFFER, &offset_uniform_data_js, GL::STATIC_DRAW);
+
+            // gl.buffer_data_with_array_buffer_view(GL::UNIFORM_BUFFER, &offset_uniform_data_js, GL::STATIC_DRAW);
 
             interval_cursor = secs;
 
@@ -173,18 +187,18 @@ pub fn explosion()
             
             // gl.uniform2f(Some(&offset_loc), 0.3, -0.4);
 
-            gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
-            gl.bind_buffer(GL::ARRAY_BUFFER, None);
-            gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
-            gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, None);
-            gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, None);
+            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            // gl.bind_buffer(GL::ARRAY_BUFFER, None);
+            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, None);
+            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, None);
         
-            gl.bind_vertex_array(None);
-            gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
-            gl.bind_buffer(GL::ARRAY_BUFFER, None);
-            gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
-            gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, None);
-            gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, None);
+            // gl.bind_vertex_array(None);
+            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            // gl.bind_buffer(GL::ARRAY_BUFFER, None);
+            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
+            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, None);
+            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, None);
 
             gl.bind_vertex_array(Some(&vertex_array_a));
             gl.bind_buffer(GL::ARRAY_BUFFER, Some(&position_buffer_a));
