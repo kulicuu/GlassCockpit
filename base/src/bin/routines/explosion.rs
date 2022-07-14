@@ -81,12 +81,8 @@ pub fn explosion()
     gl.uniform_block_binding(&shader_program, *offset_loc.lock().unwrap(), 0);
 
 
-    let offset_uniform_data = [0.3, -0.4];
 
-    let offset_uniform_buffer = gl.create_buffer();
-    gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, offset_uniform_buffer.as_ref());
-    let offset_uniform_data_js = js_sys::Float32Array::from(offset_uniform_data.as_slice());
-    gl.buffer_data_with_array_buffer_view(GL::UNIFORM_BUFFER, &offset_uniform_data_js, GL::STATIC_DRAW);
+
 
 
     let start_time = Instant::now();
@@ -111,57 +107,48 @@ pub fn explosion()
     let velocity_data = explosion_stuff.velocity_data;
     let color_data = explosion_stuff.color_data;
     
+    let mut offset_uniform_data = [0.3, -0.4];
+
+    // let offset_uniform_buffer = Arc::new(gl.create_buffer());
+    // gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, (*offset_uniform_buffer).as_ref());
+    // let offset_uniform_data_js = js_sys::Float32Array::from(offset_uniform_data.as_slice());
+    // gl.buffer_data_with_array_buffer_view(GL::UNIFORM_BUFFER, &offset_uniform_data_js, GL::STATIC_DRAW);
+
+    let offset_uniform_buffer = Arc::new(Mutex::new(gl.create_buffer()));
+    gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, (*(offset_uniform_buffer.lock().unwrap())).as_ref());
+    // gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, (*offset_uniform_buffer).as_ref());
+    let offset_uniform_data_js = js_sys::Float32Array::from(offset_uniform_data.as_slice());
+    gl.buffer_data_with_array_buffer_view(GL::UNIFORM_BUFFER, &offset_uniform_data_js, GL::STATIC_DRAW);
+
+    // gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, None);
+
     gl.use_program(Some(&shader_program));
 
     let mut switch = Arc::new(Mutex::new(AtomicBool::new(true)));
 
-
     gl.clear_color(0.98, 0.983, 0.992, 1.0);
 
-
     let mut repeat_cursor: u128 = 2000;
-
-    let mut once: bool = false;
-
     let mut interval_cursor = 0;
-
-    
-    
-    
     let render_loop_closure = Rc::new(RefCell::new(None));
     let alias_rlc = render_loop_closure.clone();
-
-
-
     *alias_rlc.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-        
-        
-
-
-
-
         gl.clear(GL::COLOR_BUFFER_BIT);
-
-
         let now = start_time.elapsed().as_millis();  // total elapsed time from start
         let frame_delta = now - cursor;
-        cursor = now;
-
-
-
-
-        //  = now / 2000;
-
-        // if ((now / 1000) % 2)  == 0 {
-        //     repeat_cursor = (now / 1000) + 2000;
-        // // if now > 5000 && !once {
-        
+        cursor = now;        
         let secs = now / 1000;
 
         if (secs % 7 == 0) && (secs > interval_cursor) {
 
-            interval_cursor = secs;
+            // gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, None);
 
+            offset_uniform_data[0] -= 0.2;
+            offset_uniform_data[1] += 0.2;
+            let offset_uniform_data_js = js_sys::Float32Array::from(offset_uniform_data.as_slice());
+            gl.buffer_data_with_array_buffer_view(GL::UNIFORM_BUFFER, &offset_uniform_data_js, GL::STATIC_DRAW);
+
+            interval_cursor = secs;
 
             for i in 0..NUM_PARTICLES {
                 let vec3i : usize = (i as usize) * 3;
