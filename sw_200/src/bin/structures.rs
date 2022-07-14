@@ -108,3 +108,16 @@ pub struct PlayerDrawStuff { // Stuff for drawing. Todo: better naming.
     pub vifo_theta_loc: Arc<WebGlUniformLocation>, //player_vifo_theta_loc
     pub time_loc: Arc::<WebGlUniformLocation>, // time_location
 }
+
+// Temporarily same as PlayerDrawStuff
+pub struct TorpDrawStuff { 
+    pub shader_program: Arc<web_sys::WebGlProgram>, 
+    pub vertex_buffer: Arc<WebGlBuffer>, 
+    pub js_vertices: Arc<js_sys::Float32Array>, 
+    pub vertices_position: Arc<u32>,
+    pub pos_deltas_loc: Arc<WebGlUniformLocation>, 
+    pub vifo_theta_loc: Arc<WebGlUniformLocation>, 
+    pub time_loc: Arc::<WebGlUniformLocation>, 
+}
+
+

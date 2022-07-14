@@ -1,5 +1,4 @@
 #![allow(unused)]
-// #![feature(drain_filter)]
 
 mod utils;
 mod game_state;
@@ -7,9 +6,7 @@ mod events;
 mod explosion;
 mod structures;
 mod player;
-
-// use explosion;
-// use utils;
+mod torp;
 
 use web_sys::{
     HtmlCanvasElement, WebGl2RenderingContext as GL, 
@@ -30,6 +27,7 @@ use std::collections::HashMap;
 use std::sync::atomic::AtomicBool;
 use gloo_console::log;
 use std::f32::consts::PI;
+
 use crate::utils::time_polyfill::Instant;
 
 const AMORTIZATION: f32 = 0.95;
@@ -55,25 +53,13 @@ fn main()
         .unwrap();
     let gl : Arc<GL> = Arc::new(gl);
 
+    let expl_shader_program = explosion::setup_shader(gl.clone()).unwrap();
+    let player_draw_stuff = player::setup_prepare_player_draw(gl.clone());
+    let torp_draw_stuff = torp::setup_prepare_torp_draw(gl.clone());
 
-    
-
-
-
-    let expl_shader_program= explosion::setup_shader(gl.clone()).unwrap();
-
-
-
-
-
-
-
-
-
-
-
-
-
+    let game_state = game_state::create_game_state().unwrap();
+    events::set_player_one_events(game_state.clone());
+    events::set_player_two_events(game_state.clone());
 
 
 

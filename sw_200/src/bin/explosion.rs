@@ -137,6 +137,8 @@ pub fn setup_shader
 pub fn prepare_explosion
 (
     gl: Arc<GL>,
+    // probably will need to inject the shader program in order to 
+    // set context with use_program(&explosion_shader_program)
 )
 -> Result<ExplosionStuff, String>
 {
