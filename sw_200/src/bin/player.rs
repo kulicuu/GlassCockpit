@@ -42,24 +42,24 @@ pub fn draw_player_one
 (
     gl: Arc<GL>,
     game_state: Arc<Mutex<GameState>>,
-    player_draw_stuff: PlayerDrawStuff,
+    player_draw_stuff: Arc<PlayerDrawStuff>,
 )
 {
 
-    let shader_program = player_draw_stuff.shader_program;
-    let vertex_buffer = player_draw_stuff.vertex_buffer;
-    let js_vertices = player_draw_stuff.js_vertices;
-    let vertices_position = player_draw_stuff.vertices_position;
-    let vifo_theta_loc = player_draw_stuff.vifo_theta_loc;
-    let pos_deltas_loc = player_draw_stuff.pos_deltas_loc;
-    let time_loc = player_draw_stuff.time_loc;
+    let shader_program = &player_draw_stuff.shader_program;
+    let vertex_buffer = &player_draw_stuff.vertex_buffer;
+    let js_vertices = &player_draw_stuff.js_vertices;
+    let vertices_position = &player_draw_stuff.vertices_position;
+    let vifo_theta_loc = &player_draw_stuff.vifo_theta_loc;
+    let pos_deltas_loc = &player_draw_stuff.pos_deltas_loc;
+    let time_loc = &player_draw_stuff.time_loc;
     
 
     gl.use_program(Some(&shader_program));
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&vertex_buffer));
     gl.buffer_data_with_array_buffer_view(GL::ARRAY_BUFFER, &js_vertices, GL::STATIC_DRAW);
-    gl.vertex_attrib_pointer_with_i32(*vertices_position, 2, GL::FLOAT, false, 0, 0);
-    gl.enable_vertex_attrib_array(*vertices_position);
+    gl.vertex_attrib_pointer_with_i32(**vertices_position, 2, GL::FLOAT, false, 0, 0);
+    gl.enable_vertex_attrib_array(**vertices_position);
     gl.uniform1f(Some(&time_loc), 0.4 as f32);
     let new_pos_dx = game_state.lock().unwrap().player_one.lock().unwrap().position_dx;
     let new_pos_dy = game_state.lock().unwrap().player_one.lock().unwrap().position_dy;
@@ -74,7 +74,7 @@ pub fn draw_player_one
 // setup shaders and some objects:
 pub fn setup_prepare_player_draw
 (gl: Arc<GL>)
--> Result<PlayerDrawStuff, String>
+-> Result<Arc<PlayerDrawStuff>, String>
 {
 
     let vehicle_100_vertices: Vec<f32> = vec![
@@ -111,14 +111,16 @@ pub fn setup_prepare_player_draw
     let vertices_position = Arc::new((gl.get_attrib_location(&shader_program, "a_position") as u32));
     
     Ok(
-        PlayerDrawStuff {
-            shader_program: shader_program,
-            vertex_buffer: vertex_buffer,
-            js_vertices: js_vertices,
-            vertices_position: vertices_position,
-            pos_deltas_loc: pos_deltas_loc,
-            vifo_theta_loc: vifo_theta_loc,
-            time_loc: time_loc
-        }
+        Arc::new(
+            PlayerDrawStuff {
+                shader_program: shader_program,
+                vertex_buffer: vertex_buffer,
+                js_vertices: js_vertices,
+                vertices_position: vertices_position,
+                pos_deltas_loc: pos_deltas_loc,
+                vifo_theta_loc: vifo_theta_loc,
+                time_loc: time_loc
+            }
+        )
     )
 }

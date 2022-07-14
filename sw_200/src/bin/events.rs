@@ -2,6 +2,8 @@
 #![allow(unused)]
 
 use crate::structures::{CollisionSpace, GameState, Torp, Vehicle};
+use crate::utils;
+use crate::utils::time_polyfill::Instant;
 
 use web_sys::{
     HtmlCanvasElement, WebGl2RenderingContext as GL, 
@@ -73,6 +75,7 @@ pub fn set_player_two_events
         // assert tsv_scalar == tsv_scalar_2;
         let t_dx = game_state.lock().unwrap().player_two.lock().unwrap().position_dx;
         let t_dy = game_state.lock().unwrap().player_two.lock().unwrap().position_dy;
+        // let time_fired: 
         let mut torpedo = Torp {
             position_dx:  t_dx,
             position_dy: t_dy,

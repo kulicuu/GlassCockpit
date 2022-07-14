@@ -54,12 +54,12 @@ fn main()
     let gl : Arc<GL> = Arc::new(gl);
 
     let expl_shader_program = explosion::setup_shader(gl.clone()).unwrap();
-    let player_draw_stuff = player::setup_prepare_player_draw(gl.clone());
-    let torp_draw_stuff = torp::setup_prepare_torp_draw(gl.clone());
+    let player_draw_stuff = player::setup_prepare_player_draw(gl.clone()).unwrap();
+    let torp_draw_stuff = torp::setup_prepare_torp_draw(gl.clone()).unwrap();
 
-    let game_state = game_state::create_game_state().unwrap();
-    events::set_player_one_events(game_state.clone());
-    events::set_player_two_events(game_state.clone());
+    let mut game_state_obj = game_state::create_game_state().unwrap(); // Todo: fix naming conflict between module and object.
+    events::set_player_one_events(game_state_obj.clone());
+    events::set_player_two_events(game_state_obj.clone());
 
 
 
@@ -80,7 +80,15 @@ fn main()
         gl.clear(GL::COLOR_BUFFER_BIT);
 
 
+        game_state::update_game_state(frame_delta, game_state_obj.clone());
 
+
+        // *game_state_obj.lock().unwrap() = 
+        player::draw_player_one(
+            gl.clone(),
+            game_state_obj.clone(),
+            player_draw_stuff.clone(),
+        );
 
 
 

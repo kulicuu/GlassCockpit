@@ -1,30 +1,26 @@
+#![allow(unused)]
+
 use web_sys::{
     HtmlCanvasElement, WebGl2RenderingContext as GL, 
     window, AngleInstancedArrays, KeyboardEvent,
     EventTarget, MouseEvent, WebGlBuffer, WebGlProgram,
     WebGlUniformLocation,
 };
-
 use serde_json::{Value};
-
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-
 use std::sync::{Arc, Mutex};
-
 use cgmath::prelude::*;
 use cgmath::Rad;
-
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::time::*;
-
 use std::convert::{TryInto};
-use std::ops::{Add, Sub, AddAssign, SubAssign};
 use std::collections::HashMap;
 use std::sync::atomic::AtomicBool;
-
 use gloo_console::log;
+use std::f32::consts::PI;
+
+use crate::utils::time_polyfill::Instant;
 
 const AMORTIZATION: f32 = 0.95;
 const LOCALIZED_SCALE : f32 = 0.001;
@@ -99,6 +95,7 @@ pub struct ExplosionStuff {
     pub color_data: Arc<Mutex<[f32; (NUM_PARTICLES * 3) as usize]>>,
 }
 
+#[derive(Clone)]
 pub struct PlayerDrawStuff { // Stuff for drawing. Todo: better naming.
     pub shader_program: Arc<web_sys::WebGlProgram>, // player_shader_program,
     pub vertex_buffer: Arc<WebGlBuffer>, // player_vertex_buffer

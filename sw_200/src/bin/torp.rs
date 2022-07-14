@@ -20,7 +20,10 @@ use std::f32::consts::PI;
 
 
 use crate::utils::time_polyfill::Instant;
-use crate::structures::{TorpDrawStuff};
+use crate::structures::{
+    TorpDrawStuff,
+    GameState,
+};
 
 const AMORTIZATION: f32 = 0.95;
 const LOCALIZED_SCALE : f32 = 0.001;
@@ -30,6 +33,45 @@ const SCALE : f32 = 0.08;
 const HALF : f32 = SCALE / 2.0;
 const STEP : f32 = SCALE / RESOLUTION;
 const NUM_PARTICLES : u32 = 9680;
+
+
+
+pub fn draw_torps
+(
+    gl: Arc<GL>,
+    game_state: Arc<Mutex<GameState>>,
+    torp_draw_stuff: TorpDrawStuff,
+)
+{
+
+    let shader_program = torp_draw_stuff.shader_program;
+    let vertex_buffer = torp_draw_stuff.vertex_buffer;
+    let js_vertices = torp_draw_stuff.js_vertices;
+    let vertices_position = torp_draw_stuff.vertices_position;
+    let vifo_theta_loc = torp_draw_stuff.vifo_theta_loc;
+    let pos_deltas_loc = torp_draw_stuff.pos_deltas_loc;
+    let time_loc = torp_draw_stuff.time_loc;
+
+    gl.use_program(Some(&shader_program));
+    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&vertex_buffer));
+    gl.buffer_data_with_array_buffer_view(GL::ARRAY_BUFFER, &js_vertices, GL::STATIC_DRAW);
+    gl.vertex_attrib_pointer_with_i32(*vertices_position, 2, GL::FLOAT, false, 0, 0);
+    gl.enable_vertex_attrib_array(*vertices_position);
+
+    gl.use_program(Some(&shader_program));
+    gl.uniform1f(Some(&time_loc), 0.4 as f32);
+
+    for (idx, torp) in game_state.lock().unwrap()
+    .torps_in_flight.lock().unwrap()
+    .iter().enumerate() {
+        let new_pos_dx = torp.lock().unwrap().position_dx;
+        let new_pos_dy = torp.lock().unwrap().position_dy;
+        let vifo_theta = torp.lock().unwrap().vifo_theta;
+        gl.uniform2f(Some(&pos_deltas_loc), new_pos_dx, new_pos_dy);
+        gl.uniform1f(Some(&vifo_theta_loc), vifo_theta.0);
+        gl.draw_arrays(GL::TRIANGLES, 0, 6);
+    }
+}
 
 
 pub fn setup_prepare_torp_draw

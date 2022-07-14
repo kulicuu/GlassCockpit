@@ -1,6 +1,6 @@
 
 use wasm_bindgen::prelude::*;
-use std::time::*;
+use std::time::{Duration};
 use std::ops::{Add, Sub, AddAssign, SubAssign};
 
 #[cfg(target_arch = "wasm32")]

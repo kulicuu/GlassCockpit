@@ -1,7 +1,4 @@
 #![allow(unused)]
-// #![feature(drain_filter)]
-
-use crate::structures::{CollisionSpace, GameState, Torp, Vehicle};
 
 use web_sys::{
     HtmlCanvasElement, WebGl2RenderingContext as GL, 
@@ -9,27 +6,41 @@ use web_sys::{
     EventTarget, MouseEvent, WebGlBuffer, WebGlProgram,
     WebGlUniformLocation,
 };
-
 use serde_json::{Value};
-
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-
 use std::sync::{Arc, Mutex};
-
 use cgmath::prelude::*;
 use cgmath::Rad;
-
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::time::*;
-
 use std::convert::{TryInto};
-use std::ops::{Add, Sub, AddAssign, SubAssign};
 use std::collections::HashMap;
 use std::sync::atomic::AtomicBool;
-
 use gloo_console::log;
+use std::f32::consts::PI;
+
+
+use crate::structures::{CollisionSpace, GameState, Torp, Vehicle};
+// use crate::utils::time_polyfill::Instant;
+use crate::utils;
+use crate::utils::time_polyfill::Instant;
+
+
+// pub fn test() {
+//     let now = Instant::now();
+//     let then = Arc::new(Instant::now());
+// }
+
+// pub fn create_game_state
+// ()
+// // -> Result<Arc<Mutex<GameState>>>
+// {
+//     let mode = 0;
+
+//     let now = Arc::new(Instant::now());
+// }
+
 
 pub fn create_game_state
 ()
@@ -64,11 +75,15 @@ pub fn create_game_state
     >> = 
         Arc::new(Mutex::new(HashMap::new()));
 
+
+    let start_time: Arc<utils::time_polyfill::Instant> = Arc::new(Instant::now());
+
     let game_state = GameState {
         player_one: player_one,
         player_two: player_two,
         torps_in_flight: torps_in_flight,
-        start_time: Arc::new(Instant::now()),
+        // start_time: Arc::new(Instant::now()),
+        start_time: start_time,
         elapsed_time: Arc::new(Mutex::new(0)),
         game_over: Arc::new(Mutex::new(false)),
         collisions_map: collisions,
@@ -82,12 +97,12 @@ pub fn create_game_state
 
 // fn update_positions 
 pub fn update_game_state // A slight misnomer, as game state is also mutated by event-handlers.
-<'a>
+
 (
     time_delta: u128,
     game_state: Arc<Mutex<GameState>>,
 )
--> Result<Arc<Mutex<GameState>>, &'a str>
+-> Result<Arc<Mutex<GameState>>, String>
 {
     let mut collisions_map : HashMap<String, CollisionSpace> = HashMap::new();
 
