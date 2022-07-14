@@ -20,27 +20,9 @@ use std::sync::atomic::AtomicBool;
 use gloo_console::log;
 use std::f32::consts::PI;
 
-
 use crate::structures::{CollisionSpace, GameState, Torp, Vehicle};
-// use crate::utils::time_polyfill::Instant;
 use crate::utils;
 use crate::utils::time_polyfill::Instant;
-
-
-// pub fn test() {
-//     let now = Instant::now();
-//     let then = Arc::new(Instant::now());
-// }
-
-// pub fn create_game_state
-// ()
-// // -> Result<Arc<Mutex<GameState>>>
-// {
-//     let mode = 0;
-
-//     let now = Arc::new(Instant::now());
-// }
-
 
 pub fn create_game_state
 ()
@@ -102,7 +84,7 @@ pub fn update_game_state // A slight misnomer, as game state is also mutated by 
     time_delta: u128,
     game_state: Arc<Mutex<GameState>>,
 )
--> Result<Arc<Mutex<GameState>>, String>
+// -> Result<Arc<Mutex<GameState>>, String>
 {
     let mut collisions_map : HashMap<String, CollisionSpace> = HashMap::new();
 
@@ -259,6 +241,6 @@ pub fn update_game_state // A slight misnomer, as game state is also mutated by 
     }
 
     collisions_map.clear();
-    Ok(game_state)
+    // Ok(game_state)
 }
 

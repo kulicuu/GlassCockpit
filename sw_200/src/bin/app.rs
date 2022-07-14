@@ -83,15 +83,32 @@ fn main()
         game_state::update_game_state(frame_delta, game_state_obj.clone());
 
 
-        // *game_state_obj.lock().unwrap() = 
-        player::draw_player_one(
+
+        let tkp1 = *(game_state_obj.lock().unwrap().torp_kills_player_1.lock().unwrap());
+        if tkp1.0 {
+
+        } else {
+            player::draw_player_one(
+                gl.clone(),
+                game_state_obj.clone(),
+                player_draw_stuff.clone(),
+            );
+        }
+
+
+
+
+        player::draw_player_two(
             gl.clone(),
             game_state_obj.clone(),
             player_draw_stuff.clone(),
         );
 
-
-
+        torp::draw_torps(
+            gl.clone(),
+            game_state_obj.clone(),
+            torp_draw_stuff.clone(),
+        );
 
 
 

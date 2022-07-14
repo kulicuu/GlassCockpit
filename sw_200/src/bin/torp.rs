@@ -40,23 +40,23 @@ pub fn draw_torps
 (
     gl: Arc<GL>,
     game_state: Arc<Mutex<GameState>>,
-    torp_draw_stuff: TorpDrawStuff,
+    torp_draw_stuff: Arc<TorpDrawStuff>,
 )
 {
 
-    let shader_program = torp_draw_stuff.shader_program;
-    let vertex_buffer = torp_draw_stuff.vertex_buffer;
-    let js_vertices = torp_draw_stuff.js_vertices;
-    let vertices_position = torp_draw_stuff.vertices_position;
-    let vifo_theta_loc = torp_draw_stuff.vifo_theta_loc;
-    let pos_deltas_loc = torp_draw_stuff.pos_deltas_loc;
-    let time_loc = torp_draw_stuff.time_loc;
+    let shader_program = &torp_draw_stuff.shader_program;
+    let vertex_buffer = &torp_draw_stuff.vertex_buffer;
+    let js_vertices = &torp_draw_stuff.js_vertices;
+    let vertices_position = &torp_draw_stuff.vertices_position;
+    let vifo_theta_loc = &torp_draw_stuff.vifo_theta_loc;
+    let pos_deltas_loc = &torp_draw_stuff.pos_deltas_loc;
+    let time_loc = &torp_draw_stuff.time_loc;
 
     gl.use_program(Some(&shader_program));
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&vertex_buffer));
     gl.buffer_data_with_array_buffer_view(GL::ARRAY_BUFFER, &js_vertices, GL::STATIC_DRAW);
-    gl.vertex_attrib_pointer_with_i32(*vertices_position, 2, GL::FLOAT, false, 0, 0);
-    gl.enable_vertex_attrib_array(*vertices_position);
+    gl.vertex_attrib_pointer_with_i32(**vertices_position, 2, GL::FLOAT, false, 0, 0);
+    gl.enable_vertex_attrib_array(**vertices_position);
 
     gl.use_program(Some(&shader_program));
     gl.uniform1f(Some(&time_loc), 0.4 as f32);
@@ -76,7 +76,7 @@ pub fn draw_torps
 
 pub fn setup_prepare_torp_draw
 (gl: Arc<GL>) 
--> Result<TorpDrawStuff, String>
+-> Result<Arc<TorpDrawStuff>, String>
 {
 
     let torpedo_100_vertices: Vec<f32> = vec![
@@ -110,18 +110,20 @@ pub fn setup_prepare_torp_draw
     let js_vertices = Arc::new(js_sys::Float32Array::from(torpedo_100_vertices.as_slice()));
     let pos_deltas_loc = Arc::new(gl.get_uniform_location(&shader_program, "pos_deltas").unwrap());
     let vifo_theta_loc =  Arc::new(gl.get_uniform_location(&shader_program, "vifo_theta").unwrap());
-    let vertices_position = Arc::new((gl.get_attrib_location(&shader_program, "a_position") as u32));
+    let vertices_position = Arc::new((gl.get_attrib_location(&shader_program, "b_position") as u32));
     
     Ok(
-        TorpDrawStuff {
-            shader_program: shader_program,
-            vertex_buffer: vertex_buffer,
-            js_vertices: js_vertices,
-            vertices_position: vertices_position,
-            pos_deltas_loc: pos_deltas_loc,
-            vifo_theta_loc: vifo_theta_loc,
-            time_loc: time_loc
-        }
+        Arc::new(
+            TorpDrawStuff {
+                shader_program: shader_program,
+                vertex_buffer: vertex_buffer,
+                js_vertices: js_vertices,
+                vertices_position: vertices_position,
+                pos_deltas_loc: pos_deltas_loc,
+                vifo_theta_loc: vifo_theta_loc,
+                time_loc: time_loc
+            }
+        )
     )
 
 
