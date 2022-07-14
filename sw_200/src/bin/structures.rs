@@ -76,6 +76,7 @@ pub struct GameState
     pub result: Arc<Mutex<u8>>,
     pub mode: Arc<u8>, // 1 player vs computer, 2 player local, 2 player network
     pub torp_kills_player_1: Arc<Mutex<(bool, f32, f32)>>,
+    pub torp_kills_player_2: Arc<Mutex<(bool, f32, f32)>>,
 }
 
 #[derive(Clone)]

@@ -72,6 +72,7 @@ pub fn create_game_state
         mode: Arc::new(mode),
         result: Arc::new(Mutex::new(0)),
         torp_kills_player_1: Arc::new(Mutex::new((false, 0.0, 0.0))),
+        torp_kills_player_2: Arc::new(Mutex::new((false, 0.0, 0.0))),
     };
 
     Ok(Arc::new(Mutex::new(game_state)))
@@ -155,6 +156,8 @@ pub fn update_game_state // A slight misnomer, as game state is also mutated by 
     game_state.lock().unwrap().player_two.lock().unwrap().position_dx = new_pos_dx;
     game_state.lock().unwrap().player_two.lock().unwrap().position_dy = new_pos_dy;
 
+    let p2_kx = new_pos_dx;
+    let p2_ky = new_pos_dy;
 
     for i in -10..10 {
         for j in -10..10 {
@@ -226,8 +229,7 @@ pub fn update_game_state // A slight misnomer, as game state is also mutated by 
 
     for (key, space) in collisions_map.iter() {
         if (space.0 == true) && (space.2.len() > 0) {
-            log!("Torpedo kills player one.");
-            
+            // log!("Torpedo kills player one.");            
             *game_state.lock().unwrap().torp_kills_player_1.lock().unwrap() = (true, p1_kx, p1_ky);
 
         }
@@ -235,7 +237,9 @@ pub fn update_game_state // A slight misnomer, as game state is also mutated by 
             log!("vehicle collision");
         }
         if (space.1 == true) && (space.2.len() > 0) {
-            log!("Torpedo kills player two.");
+            // log!("Torpedo kills player two.");
+            *game_state.lock().unwrap().torp_kills_player_2.lock().unwrap() = (true, p2_kx, p2_ky);
+
         }
 
     }

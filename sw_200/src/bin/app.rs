@@ -132,12 +132,34 @@ fn main()
 
 
 
+        let tkp2 = *(game.lock().unwrap().torp_kills_player_2.lock().unwrap());
+        if tkp2.0 {
 
-        player::draw_player_two(
-            gl.clone(),
-            game.clone(),
-            player_draw_stuff.clone(),
-        );
+            let offset_uniform_data = [tkp2.1, tkp2.2];
+            
+            explosion::set_uniforms(
+                gl.clone(),
+                offset_uniform_data,
+            );
+
+            explosion::draw_explosion(
+                gl.clone(),
+                expl_shader_program.clone(),
+                explosion_stuff.clone(),
+                expl_switch.clone(),
+            )
+
+        } else {
+            player::draw_player_two(
+                gl.clone(),
+                game.clone(),
+                player_draw_stuff.clone(),
+            );
+        }
+
+
+
+
 
         torp::draw_torps(
             gl.clone(),
