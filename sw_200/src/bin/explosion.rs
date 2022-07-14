@@ -48,24 +48,29 @@ pub fn set_uniforms
 pub fn draw_explosion
 (
     gl: Arc<GL>,
-    explosion_stuff: ExplosionStuff,
+    shader_program: Arc<WebGlProgram>,
+    explosion_stuff: Arc<ExplosionStuff>,
     switch: Arc<Mutex<AtomicBool>>,
 )
 {
-    let vertex_array_a = explosion_stuff.vertex_array_a;
-    let vertex_array_b = explosion_stuff.vertex_array_b;
-    let transform_feedback_a = explosion_stuff.transform_feedback_a;
-    let transform_feedback_b = explosion_stuff.transform_feedback_b;
-    let position_buffer_a = explosion_stuff.position_buffer_a;
-    let position_buffer_b = explosion_stuff.position_buffer_b;
-    let velocity_buffer_a = explosion_stuff.velocity_buffer_a;
-    let velocity_buffer_b = explosion_stuff.velocity_buffer_b;
-    let color_buffer = explosion_stuff.color_buffer;
-    let current_transform_feedback = explosion_stuff.current_transform_feedback;
-    let current_vertex_array = explosion_stuff.current_vertex_array;
-    let position_data = explosion_stuff.position_data;
-    let velocity_data = explosion_stuff.velocity_data;
-    let color_data = explosion_stuff.color_data;
+
+
+    gl.use_program(Some(&shader_program));
+    
+    let vertex_array_a = &explosion_stuff.vertex_array_a;
+    let vertex_array_b = &explosion_stuff.vertex_array_b;
+    let transform_feedback_a = &explosion_stuff.transform_feedback_a;
+    let transform_feedback_b = &explosion_stuff.transform_feedback_b;
+    let position_buffer_a = &explosion_stuff.position_buffer_a;
+    let position_buffer_b = &explosion_stuff.position_buffer_b;
+    let velocity_buffer_a = &explosion_stuff.velocity_buffer_a;
+    let velocity_buffer_b = &explosion_stuff.velocity_buffer_b;
+    let color_buffer = &explosion_stuff.color_buffer;
+    let current_transform_feedback = &explosion_stuff.current_transform_feedback;
+    let current_vertex_array = &explosion_stuff.current_vertex_array;
+    let position_data = &explosion_stuff.position_data;
+    let velocity_data = &explosion_stuff.velocity_data;
+    let color_data = &explosion_stuff.color_data;
 
     gl.bind_vertex_array(Some(current_vertex_array.lock().unwrap().as_ref()));
     gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, Some(current_transform_feedback.lock().unwrap().as_ref()));
@@ -85,12 +90,12 @@ pub fn draw_explosion
     gl.end_transform_feedback();
 
     if s {
-        *current_vertex_array.lock().unwrap() = (*vertex_array_b).clone();
-        *current_transform_feedback.lock().unwrap() = (*transform_feedback_a).clone();
+        *current_vertex_array.lock().unwrap() = (**vertex_array_b).clone();
+        *current_transform_feedback.lock().unwrap() = (**transform_feedback_a).clone();
     } else 
     {
-        *current_vertex_array.lock().unwrap() = (*vertex_array_a).clone();
-        *current_transform_feedback.lock().unwrap() = (*transform_feedback_b).clone();
+        *current_vertex_array.lock().unwrap() = (**vertex_array_a).clone();
+        *current_transform_feedback.lock().unwrap() = (**transform_feedback_b).clone();
     }
     *switch.lock().unwrap().get_mut() = !s; 
     gl.bind_vertex_array(None);
@@ -140,7 +145,7 @@ pub fn prepare_explosion
     // probably will need to inject the shader program in order to 
     // set context with use_program(&explosion_shader_program)
 )
--> Result<ExplosionStuff, String>
+-> Result<Arc<ExplosionStuff>, String>
 {
     let position_data: Arc<Mutex<[f32; (NUM_PARTICLES * 3) as usize]>> = Arc::new(Mutex::new([0.0; (NUM_PARTICLES * 3) as usize]));
     let velocity_data: Arc<Mutex<[f32; (NUM_PARTICLES * 3) as usize]>> = Arc::new(Mutex::new([0.0; (NUM_PARTICLES *3) as usize]));
@@ -230,22 +235,24 @@ pub fn prepare_explosion
     let mut current_transform_feedback: Arc<Mutex<_>> = Arc::new(Mutex::new((*transform_feedback_b).clone()));
 
     Ok(
-        ExplosionStuff {
-            vertex_array_a: vertex_array_a,
-            vertex_array_b: vertex_array_b,
-            transform_feedback_a: transform_feedback_a,
-            transform_feedback_b:  transform_feedback_b,
-            position_buffer_a: position_buffer_a,
-            position_buffer_b: position_buffer_b,
-            velocity_buffer_a: velocity_buffer_a,
-            velocity_buffer_b: velocity_buffer_b,
-            color_buffer: color_buffer,
-            current_transform_feedback: current_transform_feedback,
-            current_vertex_array: current_vertex_array,
-            position_data: position_data,
-            velocity_data: velocity_data,
-            color_data: color_data,
-        }
+        Arc::new(
+            ExplosionStuff {
+                vertex_array_a: vertex_array_a,
+                vertex_array_b: vertex_array_b,
+                transform_feedback_a: transform_feedback_a,
+                transform_feedback_b:  transform_feedback_b,
+                position_buffer_a: position_buffer_a,
+                position_buffer_b: position_buffer_b,
+                velocity_buffer_a: velocity_buffer_a,
+                velocity_buffer_b: velocity_buffer_b,
+                color_buffer: color_buffer,
+                current_transform_feedback: current_transform_feedback,
+                current_vertex_array: current_vertex_array,
+                position_data: position_data,
+                velocity_data: velocity_data,
+                color_data: color_data,
+            }
+        )
     )
 }
 

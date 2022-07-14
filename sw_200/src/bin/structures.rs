@@ -78,6 +78,7 @@ pub struct GameState
     pub torp_kills_player_1: Arc<Mutex<(bool, f32, f32)>>,
 }
 
+#[derive(Clone)]
 pub struct ExplosionStuff {
     pub vertex_array_a: Arc<web_sys::WebGlVertexArrayObject>,
     pub vertex_array_b: Arc<web_sys::WebGlVertexArrayObject>,
