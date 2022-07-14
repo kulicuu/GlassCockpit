@@ -74,8 +74,6 @@ pub fn explosion()
     
 
     let start_time = Instant::now();
-    let start_mark = start_time.elapsed().as_millis();
-
     let mut cursor: u128 = start_time.elapsed().as_millis();
     log!("cursor", cursor);
 
@@ -97,16 +95,19 @@ pub fn explosion()
     let velocity_data = explosion_stuff.velocity_data;
     let color_data = explosion_stuff.color_data;
     
-
-    
-
     gl.use_program(Some(&shader_program));
+
     let mut switch = Arc::new(Mutex::new(AtomicBool::new(true)));
+
 
     gl.clear_color(0.98, 0.983, 0.992, 1.0);
 
 
+    let mut repeat_cursor: u128 = 2000;
+
     let mut once: bool = false;
+
+    let mut interval_cursor = 0;
 
     let render_loop_closure = Rc::new(RefCell::new(None));
     let alias_rlc = render_loop_closure.clone();
@@ -120,15 +121,26 @@ pub fn explosion()
         gl.clear(GL::COLOR_BUFFER_BIT);
 
 
-        let now = start_time.elapsed().as_millis();
-        // log!("now ", now);
+        let now = start_time.elapsed().as_millis();  // total elapsed time from start
         let frame_delta = now - cursor;
-        // let elapsed_delta = now; // - start mark.  it's from zero
+        cursor = now;
 
 
-        if now > 5000 && !once {
-            once = true;
-            log!("five seconds");
+
+
+        //  = now / 2000;
+
+        // if ((now / 1000) % 2)  == 0 {
+        //     repeat_cursor = (now / 1000) + 2000;
+        // // if now > 5000 && !once {
+        
+        let secs = now / 1000;
+
+        if (secs % 7 == 0) && (secs > interval_cursor) {
+
+            interval_cursor = secs;
+
+
             for i in 0..NUM_PARTICLES {
                 let vec3i : usize = (i as usize) * 3;
         
