@@ -69,26 +69,13 @@ pub fn explosion()
     let v: Value = serde_json::from_str(data).unwrap();
     let js_val = wasm_bindgen::JsValue::from_serde(&v).unwrap();
     gl.transform_feedback_varyings(&shader_program, &js_val, GL::SEPARATE_ATTRIBS);
-
-    
-
     gl.link_program(&shader_program);
     
-
-    // let offset_loc = Arc::new(gl.get_uniform_location(&shader_program, "offset").unwrap());
-
     let offset_loc = Arc::new(Mutex::new(gl.get_uniform_block_index(&shader_program, "Offset")));
     gl.uniform_block_binding(&shader_program, *offset_loc.lock().unwrap(), 0);
 
-
-
-
-
-
     let start_time = Instant::now();
     let mut cursor: u128 = start_time.elapsed().as_millis();
-    log!("cursor", cursor);
-
 
     let explosion_stuff = prepare_explosion(gl.clone()).unwrap();
 
@@ -109,15 +96,10 @@ pub fn explosion()
     
     let mut offset_uniform_data = [0.3, -0.4];
 
-
-
-    // let offset_uniform_buffer = Arc::new(Mutex::new(gl.create_buffer()));
-    // gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, (*(offset_uniform_buffer.lock().unwrap())).as_ref());
     let offset_uniform_buffer = gl.create_buffer();
     gl.bind_buffer_base(GL::UNIFORM_BUFFER, 0, offset_uniform_buffer.as_ref());
     let offset_uniform_data_js = js_sys::Float32Array::from(offset_uniform_data.as_slice());
     gl.buffer_data_with_array_buffer_view(GL::UNIFORM_BUFFER, &offset_uniform_data_js, GL::STATIC_DRAW);
-
 
     gl.use_program(Some(&shader_program));
 
@@ -137,13 +119,7 @@ pub fn explosion()
         let secs = now / 1000;
 
         if (secs % 2 == 0) && (secs > interval_cursor) {
-
-            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
-            // gl.bind_buffer(GL::ARRAY_BUFFER, None);
-            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
-            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, None);
-            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, None);
-        
+       
             gl.bind_vertex_array(None);
             gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
             gl.bind_buffer(GL::ARRAY_BUFFER, None);
@@ -159,8 +135,6 @@ pub fn explosion()
             offset_uniform_data[1] += 0.2;
             let offset_uniform_data_js = js_sys::Float32Array::from(offset_uniform_data.as_slice());
             gl.buffer_data_with_array_buffer_view(GL::UNIFORM_BUFFER, &offset_uniform_data_js, GL::STATIC_DRAW);
-
-            // gl.buffer_data_with_array_buffer_view(GL::UNIFORM_BUFFER, &offset_uniform_data_js, GL::STATIC_DRAW);
 
             interval_cursor = secs;
 
@@ -183,22 +157,6 @@ pub fn explosion()
                 color_data.lock().unwrap()[vec3i + 1] = (js_sys::Math::random() as f32);
                 color_data.lock().unwrap()[vec3i + 2] = (js_sys::Math::random() as f32);
             }
-
-            
-            // gl.uniform2f(Some(&offset_loc), 0.3, -0.4);
-
-            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
-            // gl.bind_buffer(GL::ARRAY_BUFFER, None);
-            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
-            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, None);
-            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, None);
-        
-            // gl.bind_vertex_array(None);
-            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
-            // gl.bind_buffer(GL::ARRAY_BUFFER, None);
-            // gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, None);
-            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 0, None);
-            // gl.bind_buffer_base(GL::TRANSFORM_FEEDBACK_BUFFER, 1, None);
 
             gl.bind_vertex_array(Some(&vertex_array_a));
             gl.bind_buffer(GL::ARRAY_BUFFER, Some(&position_buffer_a));
@@ -259,12 +217,7 @@ pub fn explosion()
 
             *current_vertex_array.lock().unwrap() = (*vertex_array_a).clone();
             *current_transform_feedback.lock().unwrap() = (*transform_feedback_b).clone();
-
         }
-
-
-
-
 
         gl.bind_vertex_array(Some(current_vertex_array.lock().unwrap().as_ref()));
         gl.bind_transform_feedback(GL::TRANSFORM_FEEDBACK, Some(current_transform_feedback.lock().unwrap().as_ref()));
@@ -294,15 +247,10 @@ pub fn explosion()
         *switch.lock().unwrap().get_mut() = !s; 
         gl.bind_vertex_array(None);
 
-        
-
-
         request_animation_frame(render_loop_closure.borrow().as_ref().unwrap());
     }) as Box<dyn FnMut()>));
 
     request_animation_frame(alias_rlc.borrow().as_ref().unwrap());    
-
-
 }
 
 fn request_animation_frame(f: &Closure<dyn FnMut()>) {
