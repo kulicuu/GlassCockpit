@@ -2,10 +2,11 @@
 // #![feature(drain_filter)]
 
 mod utils;
-pub mod game_state;
-pub mod events;
-pub mod explosion;
-pub mod structures;
+mod game_state;
+mod events;
+mod explosion;
+mod structures;
+mod player;
 
 // use explosion;
 // use utils;
@@ -54,7 +55,27 @@ fn main()
         .unwrap();
     let gl : Arc<GL> = Arc::new(gl);
 
+
+    
+
+
+
     let expl_shader_program= explosion::setup_shader(gl.clone()).unwrap();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     let start_time = Instant::now();
     let mut cursor: u128 = start_time.elapsed().as_millis();

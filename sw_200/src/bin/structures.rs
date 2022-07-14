@@ -98,3 +98,13 @@ pub struct ExplosionStuff {
     pub velocity_data: Arc<Mutex<[f32; (NUM_PARTICLES * 3) as usize]>>,
     pub color_data: Arc<Mutex<[f32; (NUM_PARTICLES * 3) as usize]>>,
 }
+
+pub struct PlayerDrawStuff { // Stuff for drawing. Todo: better naming.
+    pub shader_program: Arc<web_sys::WebGlProgram>, // player_shader_program,
+    pub vertex_buffer: Arc<WebGlBuffer>, // player_vertex_buffer
+    pub js_vertices: Arc<js_sys::Float32Array>, // player_js_vertices,
+    pub vertices_position: Arc<u32>, // player_vertices_position
+    pub pos_deltas_loc: Arc<WebGlUniformLocation>, //player_pos_deltas_loc
+    pub vifo_theta_loc: Arc<WebGlUniformLocation>, //player_vifo_theta_loc
+    pub time_loc: Arc::<WebGlUniformLocation>, // time_location
+}
